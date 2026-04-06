@@ -1,0 +1,52 @@
+-r base.txt
+
+# Production Server
+gunicorn==21.2.0
+uvicorn==0.24.0
+whitenoise==6.6.0
+
+# Database Connection Pooling
+pgbouncer==1.21.0
+
+# Monitoring & Logging
+sentry-sdk==1.38.0
+structlog==23.2.0
+newrelic==9.2.0
+
+# Performance
+django-cacheops==7.4.4
+django-storages==1.14.2
+boto3==1.34.0
+
+# Security
+django-axes==6.1.1
+django-ratelimit==4.1.0
+django-otp==1.2.2
+
+# Email
+django-anymail==0.23.0
+mailchimp-transactional==1.0.0
+
+# Analytics
+django-user-analytics==1.4.0
+
+# Health Checks
+django-health-check==3.18.1
+
+# Background Tasks
+celery==5.3.4
+flower==2.0.1
+redis==5.0.1
+
+# File Storage (S3)
+django-storages==1.14.2
+boto3==1.34.0
+
+# Rate Limiting
+django-ratelimit==4.1.0
+
+# API Caching
+drf-extensions==0.7.1
+
+# Database Optimization
+django-db-connection-pool==1.2.4

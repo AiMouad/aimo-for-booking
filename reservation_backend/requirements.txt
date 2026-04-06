@@ -1,0 +1,9 @@
+pytest-django
+djangorestframework-simplejwt[crypto]
+django-cors-headers
+drf-spectacular
+requests
+django-filter
+psycopg2-binary
+gunicorn
+python-dotenv
