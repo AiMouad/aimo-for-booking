@@ -40,11 +40,24 @@ export const getCurrentUser = createAsyncThunk(
   }
 );
 
+export const fetchUsers = createAsyncThunk(
+  'auth/fetchUsers',
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      const response = await authService.getUsers(params);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'Failed to fetch users');
+    }
+  }
+);
+
 // Slice
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
     user: null,
+    users: [],
     token: localStorage.getItem('accessToken'),
     refreshToken: localStorage.getItem('refreshToken'),
     isLoading: false,
@@ -103,6 +116,19 @@ const authSlice = createSlice({
         state.user = action.payload;
       })
       .addCase(getCurrentUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      // Fetch users
+      .addCase(fetchUsers.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchUsers.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.users = action.payload.results || action.payload;
+      })
+      .addCase(fetchUsers.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       });

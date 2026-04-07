@@ -2,7 +2,8 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchServices, clearSearchResults } from '../servicesSlice';
 import ServiceCard from './ServiceCard';
-import Loader from '../../../components/common/Button';
+import Loader from '../../../components/common/Loader';
+import Button from '../../../components/common/Button';
 import Input from '../../../components/common/Input';
 
 const ServiceGrid = ({ filters = [], showSearch = true }) => {

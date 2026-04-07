@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
 // Create axios instance
 const api = axios.create({
@@ -34,7 +34,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => {
     // Log successful responses in development
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.log(`API Success: ${response.config.method?.toUpperCase()} ${response.config.url}`, response.data);
     }
     return response;
@@ -43,7 +43,7 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     // Log errors in development
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.error(`API Error: ${originalRequest.method?.toUpperCase()} ${originalRequest.url}`, error.response?.data);
     }
 

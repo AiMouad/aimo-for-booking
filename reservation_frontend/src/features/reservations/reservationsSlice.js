@@ -86,6 +86,30 @@ export const rateReservation = createAsyncThunk(
   }
 );
 
+export const fetchMyReservations = createAsyncThunk(
+  'reservations/fetchMyReservations',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await reservationService.getMyBookings();
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'Failed to fetch my reservations');
+    }
+  }
+);
+
+export const fetchReservationStatistics = createAsyncThunk(
+  'reservations/fetchReservationStatistics',
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      const response = await reservationService.getBookingStatistics(params);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'Failed to fetch reservation statistics');
+    }
+  }
+);
+
 // Slice
 const reservationsSlice = createSlice({
   name: 'reservations',
@@ -94,6 +118,7 @@ const reservationsSlice = createSlice({
     upcomingReservations: [],
     reservationHistory: [],
     currentReservation: null,
+    statistics: null,
     isLoading: false,
     isCreating: false,
     isUpdating: false,
@@ -197,6 +222,44 @@ const reservationsSlice = createSlice({
         }
       })
       .addCase(rateReservation.rejected, (state, action) => {
+        state.error = action.payload;
+      })
+      // Fetch my reservations
+      .addCase(fetchMyReservations.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchMyReservations.fulfilled, (state, action) => {
+        state.isLoading = false;
+        // Split reservations into upcoming and history based on status and date
+        const now = new Date();
+        const reservations = action.payload.results || action.payload;
+        
+        state.upcomingReservations = reservations.filter(reservation => {
+          const reservationDate = new Date(reservation.date_time);
+          return reservationDate > now && ['PENDING', 'CONFIRMED'].includes(reservation.status);
+        });
+        
+        state.reservationHistory = reservations.filter(reservation => {
+          const reservationDate = new Date(reservation.date_time);
+          return reservationDate <= now || ['COMPLETED', 'CANCELLED'].includes(reservation.status);
+        });
+      })
+      .addCase(fetchMyReservations.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      // Fetch reservation statistics
+      .addCase(fetchReservationStatistics.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchReservationStatistics.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.statistics = action.payload;
+      })
+      .addCase(fetchReservationStatistics.rejected, (state, action) => {
+        state.isLoading = false;
         state.error = action.payload;
       });
   },

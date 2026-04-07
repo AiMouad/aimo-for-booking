@@ -152,6 +152,15 @@ const authService = {
     }
   },
 
+  async getUsers(params = {}) {
+    try {
+      const response = await api.get('/auth/users/', { params });
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
   // Helper methods
   isAuthenticated() {
     return !!localStorage.getItem('accessToken');

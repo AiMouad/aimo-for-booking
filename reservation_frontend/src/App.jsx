@@ -3,6 +3,9 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { store } from './store';
 
+// Context
+import { AuthProvider } from './context/AuthContext';
+
 // Layout
 import Layout from './components/layout/Layout';
 
@@ -20,11 +23,15 @@ import NotificationDropdown from './features/notifications/components/Notificati
 // Hooks
 import useAuth from './hooks/useAuth';
 
-const App = () => {
-  const { user, isAuthenticated } = useAuth();
+const AppContent = () => {
+  const { user, loading, isAuthenticated } = useAuth();
 
   // Protected route wrapper
   const ProtectedRoute = ({ children, allowedRoles = [] }) => {
+    if (loading) {
+      return <div>Loading...</div>;
+    }
+
     if (!isAuthenticated) {
       return <Navigate to="/login" replace />;
     }
@@ -37,55 +44,63 @@ const App = () => {
   };
 
   return (
+    <BrowserRouter>
+      <Layout>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/login" element={<LoginForm />} />
+          <Route path="/register" element={<RegisterForm />} />
+          
+          {/* Service Routes */}
+          <Route path="/services" element={<ServiceGrid />} />
+          <Route path="/services/:id/book" element={
+            <ProtectedRoute allowedRoles={['CLIENT']}>
+              <BookService />
+            </ProtectedRoute>
+          } />
+          
+          {/* Client Routes */}
+          <Route path="/my-reservations" element={
+            <ProtectedRoute allowedRoles={['CLIENT']}>
+              <MyReservations />
+            </ProtectedRoute>
+          } />
+          
+          {/* Worker Routes */}
+          <Route path="/worker" element={
+            <ProtectedRoute allowedRoles={['WORKER']}>
+              <WorkerDashboard />
+            </ProtectedRoute>
+          } />
+          
+          {/* Owner Routes */}
+          <Route path="/owner" element={
+            <ProtectedRoute allowedRoles={['OWNER']}>
+              <OwnerDashboard />
+            </ProtectedRoute>
+          } />
+          
+          {/* Chatbot - Available to all authenticated users */}
+          <Route path="/chatbot" element={
+            <ProtectedRoute>
+              <ChatInterface />
+            </ProtectedRoute>
+          } />
+          
+          {/* Default redirect */}
+          <Route path="/" element={<Navigate to="/services" replace />} />
+        </Routes>
+      </Layout>
+    </BrowserRouter>
+  );
+};
+
+const App = () => {
+  return (
     <Provider store={store}>
-      <BrowserRouter>
-        <Layout>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/login" element={<LoginForm />} />
-            <Route path="/register" element={<RegisterForm />} />
-            
-            {/* Service Routes */}
-            <Route path="/services" element={<ServiceGrid />} />
-            <Route path="/services/:id/book" element={
-              <ProtectedRoute allowedRoles={['CLIENT']}>
-                <BookService />
-              </ProtectedRoute>
-            } />
-            
-            {/* Client Routes */}
-            <Route path="/my-reservations" element={
-              <ProtectedRoute allowedRoles={['CLIENT']}>
-                <MyReservations />
-              </ProtectedRoute>
-            } />
-            
-            {/* Worker Routes */}
-            <Route path="/worker" element={
-              <ProtectedRoute allowedRoles={['WORKER']}>
-                <WorkerDashboard />
-              </ProtectedRoute>
-            } />
-            
-            {/* Owner Routes */}
-            <Route path="/owner" element={
-              <ProtectedRoute allowedRoles={['OWNER']}>
-                <OwnerDashboard />
-              </ProtectedRoute>
-            } />
-            
-            {/* Chatbot - Available to all authenticated users */}
-            <Route path="/chatbot" element={
-              <ProtectedRoute>
-                <ChatInterface />
-              </ProtectedRoute>
-            } />
-            
-            {/* Default redirect */}
-            <Route path="/" element={<Navigate to="/services" replace />} />
-          </Routes>
-        </Layout>
-      </BrowserRouter>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </Provider>
   );
 };
