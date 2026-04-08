@@ -1,242 +1,91 @@
 from rest_framework import serializers
-from django.contrib.auth import get_user_model
-from .models import Property, Apartment, PropertyImage, ApartmentImage
-
-User = get_user_model()
+from .models import Property, Apartment, AvailableDate, Review
 
 
-class PropertyImageSerializer(serializers.ModelSerializer):
-    """Serializer for property images."""
-    
+class AvailableDateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PropertyImage
-        fields = [
-            'id', 'image', 'caption', 'is_primary', 'order', 'created_at'
-        ]
+        model = AvailableDate
+        fields = ['id', 'start', 'end', 'created_at']
         read_only_fields = ['id', 'created_at']
-
-
-class ApartmentImageSerializer(serializers.ModelSerializer):
-    """Serializer for apartment images."""
-    
-    class Meta:
-        model = ApartmentImage
-        fields = [
-            'id', 'image', 'caption', 'is_primary', 'order', 'created_at'
-        ]
-        read_only_fields = ['id', 'created_at']
-
-
-class PropertySerializer(serializers.ModelSerializer):
-    """Serializer for properties."""
-    
-    owner_name = serializers.CharField(source='owner.get_full_name', read_only=True)
-    images = PropertyImageSerializer(many=True, read_only=True)
-    active_apartments_count = serializers.ReadOnlyField()
-    
-    class Meta:
-        model = Property
-        fields = [
-            'id', 'name', 'type', 'description', 'address', 'city', 'country',
-            'postal_code', 'latitude', 'longitude', 'images', 'amenities',
-            'featured_image', 'owner', 'owner_name', 'is_active', 'is_featured',
-            'is_verified', 'average_rating', 'total_reviews', 'booking_count',
-            'active_apartments_count', 'created_at', 'updated_at'
-        ]
-        read_only_fields = [
-            'id', 'average_rating', 'total_reviews', 'booking_count',
-            'active_apartments_count', 'created_at', 'updated_at'
-        ]
-    
-    def create(self, validated_data):
-        """Create property with owner from request user."""
-        request = self.context.get('request')
-        if request and hasattr(request, 'user'):
-            validated_data['owner'] = request.user
-        return super().create(validated_data)
-
-
-class PropertyListSerializer(serializers.ModelSerializer):
-    """Lightweight serializer for property lists."""
-    
-    owner_name = serializers.CharField(source='owner.get_full_name', read_only=True)
-    active_apartments_count = serializers.ReadOnlyField()
-    
-    class Meta:
-        model = Property
-        fields = [
-            'id', 'name', 'type', 'city', 'country', 'featured_image',
-            'owner', 'owner_name', 'is_active', 'is_featured', 'is_verified',
-            'average_rating', 'total_reviews', 'active_apartments_count',
-            'created_at'
-        ]
 
 
 class ApartmentSerializer(serializers.ModelSerializer):
-    """Serializer for apartments."""
-    
+    available_dates = AvailableDateSerializer(many=True, read_only=True)
     property_name = serializers.CharField(source='property.name', read_only=True)
-    property_owner = serializers.CharField(source='property.owner.get_full_name', read_only=True)
-    images = ApartmentImageSerializer(many=True, read_only=True)
-    total_price_per_night = serializers.ReadOnlyField()
-    
+
     class Meta:
         model = Apartment
         fields = [
-            'id', 'name', 'property', 'property_name', 'property_owner',
-            'max_guests', 'bedrooms', 'beds', 'bathrooms', 'price_per_night',
-            'cleaning_fee', 'service_fee', 'description', 'amenities',
-            'images', 'is_active', 'is_available_for_booking',
-            'total_price_per_night', 'created_at', 'updated_at'
+            'apartment_id', 'property', 'property_name', 'name', 'type',
+            'price', 'max_guests', 'media', 'is_public', 'description',
+            'available_dates', 'created_at', 'updated_at',
         ]
-        read_only_fields = [
-            'id', 'total_price_per_night', 'created_at', 'updated_at'
-        ]
-    
-    def validate(self, data):
-        """Validate apartment data."""
-        # Ensure max_guests is reasonable
-        max_guests = data.get('max_guests')
-        if max_guests and max_guests > 20:
-            raise serializers.ValidationError("Maximum guests cannot exceed 20.")
-        
-        # Validate pricing
-        price_per_night = data.get('price_per_night')
-        if price_per_night and price_per_night <= 0:
-            raise serializers.ValidationError("Price per night must be greater than 0.")
-        
-        return data
+        read_only_fields = ['apartment_id', 'created_at', 'updated_at']
 
 
 class ApartmentListSerializer(serializers.ModelSerializer):
-    """Lightweight serializer for apartment lists."""
-    
-    property_name = serializers.CharField(source='property.name', read_only=True)
-    property_city = serializers.CharField(source='property.city', read_only=True)
-    total_price_per_night = serializers.ReadOnlyField()
-    
+    """Lightweight serializer for listing apartments."""
     class Meta:
         model = Apartment
-        fields = [
-            'id', 'name', 'property', 'property_name', 'property_city',
-            'max_guests', 'bedrooms', 'beds', 'bathrooms', 'price_per_night',
-            'cleaning_fee', 'service_fee', 'featured_image', 'is_active',
-            'is_available_for_booking', 'total_price_per_night', 'created_at'
-        ]
+        fields = ['apartment_id', 'name', 'type', 'price', 'max_guests', 'media', 'is_public']
 
 
-class ApartmentAvailabilitySerializer(serializers.Serializer):
-    """Serializer for checking apartment availability."""
-    
-    check_in = serializers.DateField()
-    check_out = serializers.DateField()
-    num_guests = serializers.IntegerField(min_value=1, max_value=20)
-    
-    def validate(self, data):
-        """Validate availability check parameters."""
-        check_in = data.get('check_in')
-        check_out = data.get('check_out')
-        
-        if check_in and check_out and check_in >= check_out:
-            raise serializers.ValidationError("Check-out date must be after check-in date.")
-        
-        # Check if dates are not too far in the future
-        from datetime import date
-        if check_in and check_in > date.today().replace(year=date.today().year + 1):
-            raise serializers.ValidationError("Check-in date cannot be more than 1 year in the future.")
-        
-        return data
+class ReviewSerializer(serializers.ModelSerializer):
+    user_name = serializers.CharField(source='user.username', read_only=True)
+    user_photo = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Review
+        fields = ['review_id', 'user', 'user_name', 'user_photo', 'rating', 'comment', 'created_at']
+        read_only_fields = ['review_id', 'user', 'user_name', 'user_photo', 'created_at']
+
+    def get_user_photo(self, obj):
+        request = self.context.get('request')
+        if obj.user.photo and request:
+            return request.build_absolute_uri(obj.user.photo.url)
+        return None
+
+    def validate_rating(self, value):
+        if not 1.0 <= value <= 5.0:
+            raise serializers.ValidationError('Rating must be between 1 and 5.')
+        return value
 
 
-class PropertyCreateSerializer(serializers.ModelSerializer):
-    """Serializer for creating properties."""
-    
-    images = PropertyImageSerializer(many=True, required=False)
-    
+class PropertyListSerializer(serializers.ModelSerializer):
+    """Lightweight serializer for property listings."""
+    owner_name = serializers.CharField(source='owner.username', read_only=True)
+    apartments_count = serializers.IntegerField(source='apartments.count', read_only=True)
+
     class Meta:
         model = Property
         fields = [
-            'name', 'type', 'description', 'address', 'city', 'country',
-            'postal_code', 'latitude', 'longitude', 'images', 'amenities',
-            'featured_image'
+            'property_id', 'name', 'type', 'location', 'rating',
+            'media', 'is_public', 'views', 'owner_name', 'apartments_count', 'created_at',
         ]
-    
-    def create(self, validated_data):
-        """Create property with images."""
-        images_data = validated_data.pop('images', [])
-        request = self.context.get('request')
-        
-        if request and hasattr(request, 'user'):
-            validated_data['owner'] = request.user
-        
-        property = Property.objects.create(**validated_data)
-        
-        # Create associated images
-        for image_data in images_data:
-            PropertyImage.objects.create(property=property, **image_data)
-        
-        return property
 
 
-class ApartmentCreateSerializer(serializers.ModelSerializer):
-    """Serializer for creating apartments."""
-    
-    images = ApartmentImageSerializer(many=True, required=False)
-    
+class PropertySerializer(serializers.ModelSerializer):
+    """Full property detail serializer."""
+    owner_name = serializers.CharField(source='owner.username', read_only=True)
+    apartments = ApartmentListSerializer(many=True, read_only=True)
+    reviews = ReviewSerializer(many=True, read_only=True)
+    reviews_count = serializers.IntegerField(source='reviews.count', read_only=True)
+
     class Meta:
-        model = Apartment
+        model = Property
         fields = [
-            'name', 'property', 'max_guests', 'bedrooms', 'beds', 'bathrooms',
-            'price_per_night', 'cleaning_fee', 'service_fee', 'description',
-            'amenities', 'images'
+            'property_id', 'name', 'type', 'location', 'description',
+            'amenities', 'media', 'is_public', 'views', 'rating',
+            'owner', 'owner_name', 'apartments', 'reviews', 'reviews_count',
+            'created_at', 'updated_at',
         ]
-    
+        read_only_fields = ['property_id', 'views', 'rating', 'created_at', 'updated_at']
+        extra_kwargs = {
+            'owner': {'required': False, 'write_only': True},
+        }
+
     def create(self, validated_data):
-        """Create apartment with images."""
-        images_data = validated_data.pop('images', [])
-        apartment = Apartment.objects.create(**validated_data)
-        
-        # Create associated images
-        for image_data in images_data:
-            ApartmentImage.objects.create(apartment=apartment, **image_data)
-        
-        return apartment
-
-
-class PropertySearchSerializer(serializers.Serializer):
-    """Serializer for property search parameters."""
-    
-    location = serializers.CharField(required=False)
-    check_in = serializers.DateField(required=False)
-    check_out = serializers.DateField(required=False)
-    num_guests = serializers.IntegerField(min_value=1, max_value=20, required=False)
-    property_type = serializers.ChoiceField(
-        choices=Property.TYPE_CHOICES,
-        required=False
-    )
-    min_price = serializers.DecimalField(min_value=0, required=False)
-    max_price = serializers.DecimalField(min_value=0, required=False)
-    amenities = serializers.ListField(
-        child=serializers.CharField(),
-        required=False
-    )
-    rating = serializers.IntegerField(min_value=1, max_value=5, required=False)
-    
-    def validate(self, data):
-        """Validate search parameters."""
-        check_in = data.get('check_in')
-        check_out = data.get('check_out')
-        
-        if check_in and not check_out:
-            raise serializers.ValidationError("Check-out date is required when check-in is provided.")
-        
-        if check_in and check_out and check_in >= check_out:
-            raise serializers.ValidationError("Check-out date must be after check-in date.")
-        
-        min_price = data.get('min_price')
-        max_price = data.get('max_price')
-        
-        if min_price and max_price and min_price >= max_price:
-            raise serializers.ValidationError("Minimum price must be less than maximum price.")
-        
-        return data
+        request = self.context.get('request')
+        if request and request.user.is_authenticated and request.user.role == 'owner':
+            validated_data['owner'] = request.user
+        return super().create(validated_data)

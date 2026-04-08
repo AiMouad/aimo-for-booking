@@ -1,28 +1,30 @@
 from rest_framework import serializers
-from .models import Availability
-from django.utils import timezone
+from .models import WorkerProfile, WorkerSchedule
+from apps.users.serializers import UserPublicSerializer
 
 
-class AvailabilitySerializer(serializers.ModelSerializer):
+class WorkerScheduleSerializer(serializers.ModelSerializer):
+    day_name = serializers.CharField(source='get_day_of_week_display', read_only=True)
+
     class Meta:
-        model = Availability
-        fields = ['id', 'worker', 'start_time', 'end_time', 'is_recurring', 'day_of_week']
-        read_only_fields = ['id', 'worker']
+        model = WorkerSchedule
+        fields = ['id', 'day_of_week', 'day_name', 'start_time', 'end_time', 'is_available']
+        read_only_fields = ['id', 'day_name']
 
-    def validate(self, data):
-        start_time = data.get('start_time')
-        end_time = data.get('end_time')
 
-        if start_time and end_time and start_time >= end_time:
-            raise serializers.ValidationError("End time must be after start time.")
-            
-        if start_time and start_time < timezone.now():
-            raise serializers.ValidationError({"start_time": "Availability cannot be in the past."})
+class WorkerProfileSerializer(serializers.ModelSerializer):
+    user = UserPublicSerializer(read_only=True)
+    schedules = WorkerScheduleSerializer(many=True, read_only=True)
+    assigned_properties_count = serializers.IntegerField(
+        source='assigned_properties.count', read_only=True
+    )
 
-        return data
-
-    def create(self, validated_data):
-        # Auto-set the worker to the requesting user
-        request = self.context.get('request')
-        validated_data['worker'] = request.user
-        return super().create(validated_data)
+    class Meta:
+        model = WorkerProfile
+        fields = [
+            'id', 'user', 'bio', 'specialization',
+            'assigned_properties', 'assigned_properties_count',
+            'is_available', 'schedules',
+            'created_at', 'updated_at',
+        ]
+        read_only_fields = ['id', 'user', 'created_at', 'updated_at']

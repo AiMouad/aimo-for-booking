@@ -1,40 +1,39 @@
+import uuid
 from django.db import models
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
+
 
 class Notification(models.Model):
     class Type(models.TextChoices):
-        RESERVATION_CREATED = 'reservation_created', 'Reservation Created'
-        RESERVATION_CONFIRMED = 'reservation_confirmed', 'Reservation Confirmed'
-        RESERVATION_CANCELLED = 'reservation_cancelled', 'Reservation Cancelled'
-        RESERVATION_REMINDER = 'reservation_reminder', 'Reservation Reminder'
-        SYSTEM_ANNOUNCEMENT = 'system_announcement', 'System Announcement'
+        INFO = 'info', _('Info')
+        SUCCESS = 'success', _('Success')
+        WARNING = 'warning', _('Warning')
+        ALERT = 'alert', _('Alert')
 
-    recipient = models.ForeignKey(
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='notifications'
+        related_name='notifications',
     )
-    type = models.CharField(max_length=30, choices=Type.choices)
     title = models.CharField(max_length=200)
     message = models.TextField()
+    type = models.CharField(max_length=10, choices=Type.choices, default=Type.INFO)
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    
-    # Optional related object
-    reservation = models.ForeignKey(
-        'reservations.Reservation',
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        related_name='notifications'
-    )
 
     class Meta:
+        verbose_name = _('Notification')
+        verbose_name_plural = _('Notifications')
         ordering = ['-created_at']
-        indexes = [
-            models.Index(fields=['recipient', 'is_read']),
-            models.Index(fields=['type']),
-        ]
 
     def __str__(self):
-        return f"{self.title} - {self.recipient.username}"
+        return f'[{self.type}] {self.title} → {self.user.username}'
+
+
+def create_notification(user, title, message, notification_type='info'):
+    """Helper to create a notification."""
+    return Notification.objects.create(
+        user=user, title=title, message=message, type=notification_type
+    )

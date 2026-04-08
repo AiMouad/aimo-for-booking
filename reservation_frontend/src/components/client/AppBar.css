@@ -1,0 +1,420 @@
+/* Client AppBar Styles - Based on source project color scheme */
+:root {
+  --primary-color: #087592;
+  --secondary-color: #2393b0;
+  --accent-color: #3b82f6;
+  --light-color: #f8f9fa;
+  --text-color: #ffffff;
+  --border-color: #3b82f6;
+  --hover-bg: #f3f4f6;
+  --danger-color: #ef4444;
+}
+
+.cli-appbar-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+  color: var(--text-color);
+  width: 100%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.cli-appbar-container {
+  margin: 0 auto;
+  padding: 0 16px;
+  max-width: 1200px;
+}
+
+.cli-appbar-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 64px;
+  min-width: 100px;
+}
+
+.cli-appbar-logo-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cli-appbar-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--text-color);
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: var(--primary-color);
+}
+
+.cli-appbar-logo-text {
+  display: none;
+}
+
+.cli-appbar-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-color);
+  margin: 0;
+}
+
+/* Desktop Menu */
+.cli-appbar-menu-desktop {
+  display: none;
+  margin-left: 4%;
+  gap: 32px;
+}
+
+@media (min-width: 768px) {
+  .cli-appbar-menu-desktop {
+    display: flex;
+  }
+}
+
+.cli-appbar-menu-item {
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 0.375rem;
+  background-color: transparent;
+  color: var(--text-color);
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cli-appbar-menu-icon {
+  font-size: 1rem;
+}
+
+.cli-appbar-menu-item:hover {
+  background-color: var(--accent-color);
+  color: var(--text-color);
+  transform: translateY(-1px);
+}
+
+.cli-appbar-menu-item:active {
+  transform: translateY(0);
+}
+
+/* Desktop Actions */
+.cli-appbar-actions-desktop {
+  display: none;
+  gap: 1rem;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .cli-appbar-actions-desktop {
+    display: flex;
+  }
+}
+
+.cli-appbar-language-section {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.cli-appbar-globe-icon {
+  font-size: 1.25rem;
+  color: var(--text-color);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.cli-appbar-globe-icon:hover {
+  color: var(--light-color);
+  transform: rotate(15deg);
+}
+
+.cli-appbar-language-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: var(--text-color);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding: 8px;
+  z-index: 10;
+  min-width: 80px;
+  border: 1px solid var(--border-color);
+}
+
+.cli-appbar-language-option {
+  display: block;
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  border-radius: 6px;
+  color: #333;
+  transition: all 0.2s ease;
+  border: none;
+  background: transparent;
+}
+
+.cli-appbar-language-option:hover {
+  background-color: var(--hover-bg);
+  color: var(--primary-color);
+}
+
+/* Profile Section */
+.cli-appbar-profile-section {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.cli-appbar-profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+}
+
+.cli-appbar-profile:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.cli-appbar-profile-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--text-color);
+}
+
+.cli-appbar-profile-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.cli-appbar-profile-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: var(--text-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding: 8px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+  border: 1px solid var(--border-color);
+}
+
+.cli-appbar-profile-option {
+  padding: 10px 12px;
+  font-size: 0.875rem;
+  color: #333;
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cli-appbar-logout-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--danger-color);
+}
+
+.cli-appbar-profile-option:hover {
+  background-color: var(--hover-bg);
+  color: var(--primary-color);
+}
+
+.cli-appbar-signout {
+  color: var(--danger-color);
+  font-weight: 600;
+}
+
+/* Mobile Menu Button */
+.cli-appbar-mobile-menu-button {
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .cli-appbar-mobile-menu-button {
+    display: none;
+  }
+}
+
+.cli-appbar-mobile-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-color);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.cli-appbar-mobile-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.cli-icon {
+  width: 24px;
+  height: 24px;
+}
+
+/* Mobile Menu */
+.cli-appbar-mobile-menu {
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+  padding: 16px;
+  border-top: 1px solid var(--border-color);
+  max-height: calc(100vh - 64px);
+  overflow-y: auto;
+}
+
+.cli-appbar-mobile-menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 0.375rem;
+  color: var(--text-color);
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cli-appbar-mobile-menu-item:hover {
+  background-color: var(--accent-color);
+  color: var(--text-color);
+  transform: translateX(4px);
+}
+
+/* Mobile Profile Section */
+.cli-appbar-profile-section-mobile {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+}
+
+.cli-appbar-profile-info-mobile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.cli-appbar-profile-icon-mobile {
+  width: 24px;
+  height: 24px;
+  color: var(--text-color);
+}
+
+.cli-appbar-profile-name-mobile {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.cli-appbar-profile-options-mobile {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cli-appbar-profile-option-mobile {
+  padding: 12px 16px;
+  font-size: 0.875rem;
+  color: var(--text-color);
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cli-appbar-profile-option-mobile:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.cli-appbar-signout-mobile {
+  color: var(--danger-color);
+  font-weight: 600;
+}
+
+.cli-appbar-logout-icon-mobile {
+  width: 16px;
+  height: 16px;
+  color: var(--danger-color);
+}
+
+/* Mobile Language */
+.cli-appbar-language-mobile {
+  border-top: 1px solid var(--border-color);
+  padding-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+}
+
+.cli-appbar-globe-icon-mobile {
+  font-size: 1.25rem;
+  color: var(--text-color);
+}
+
+.cli-appbar-language-select {
+  font-size: 0.875rem;
+  border-radius: 6px;
+  padding: 6px 8px;
+  color: #333;
+  background: var(--text-color);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+  .cli-appbar-title {
+    font-size: 1.1rem;
+  }
+  
+  .cli-appbar-container {
+    padding: 0 12px;
+  }
+}

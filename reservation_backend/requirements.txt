@@ -1,9 +1,27 @@
-pytest-django
-djangorestframework-simplejwt[crypto]
-django-cors-headers
-drf-spectacular
-requests
-django-filter
-psycopg2-binary
-gunicorn
-python-dotenv
+# Core
+Django==4.2.16
+djangorestframework==3.15.2
+django-cors-headers==4.4.0
+django-environ==0.11.2
+django-filter==24.3
+python-dotenv==1.0.0
+
+# Database
+psycopg2-binary==2.9.9
+
+# Authentication
+djangorestframework-simplejwt==5.3.1
+Pillow==11.0.0
+
+# API Schema
+drf-spectacular==0.27.2
+
+# AI / Chatbot
+google-generativeai==0.8.3
+
+# Validation & Utilities
+pytz==2024.1
+
+# Production
+gunicorn==23.0.0
+whitenoise==6.7.0

@@ -1,20 +1,20 @@
 import { configureStore } from '@reduxjs/toolkit';
-import authReducer from '../features/auth/authSlice';
-import servicesReducer from '../features/services/servicesSlice';
-import reservationsReducer from '../features/reservations/reservationsSlice';
-import chatbotReducer from '../features/chatbot/chatbotSlice';
-import notificationsReducer from '../features/notifications/notificationsSlice';
+import authReducer from './authSlice';
+import propertiesReducer from './propertiesSlice';
+import bookingsReducer from './bookingsSlice';
+import chatbotReducer from './chatbotSlice';
+import notificationsReducer from './notificationsSlice';
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
-    services: servicesReducer,
-    reservations: reservationsReducer,
+    properties: propertiesReducer,
+    bookings: bookingsReducer,
     chatbot: chatbotReducer,
     notifications: notificationsReducer,
   },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
+  middleware: (getDefault) =>
+    getDefault({
       serializableCheck: {
         ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
       },

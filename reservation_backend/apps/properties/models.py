@@ -1,292 +1,251 @@
+import uuid
 from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from datetime import datetime, timedelta
-import uuid
 
 
 class Property(models.Model):
-    """
-    Property model representing hotels, residences, or apartment buildings.
-    Owned by a user with 'owner' role.
-    """
-    TYPE_CHOICES = [
-        ('hotel', 'Hotel'),
-        ('residence', 'Residence'),
-        ('apartment', 'Apartment Building'),
-        ('villa', 'Villa'),
-        ('hostel', 'Hostel'),
-    ]
-    
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=100, verbose_name="Property Name")
-    type = models.CharField(max_length=20, choices=TYPE_CHOICES, verbose_name="Property Type")
-    description = models.TextField(blank=True, verbose_name="Description")
-    
-    # Location
-    address = models.CharField(max_length=255, verbose_name="Address")
-    city = models.CharField(max_length=100, verbose_name="City")
-    country = models.CharField(max_length=100, verbose_name="Country")
-    postal_code = models.CharField(max_length=20, verbose_name="Postal Code")
-    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    
-    # Media and amenities
-    images = models.JSONField(default=list, verbose_name="Property Images")
-    amenities = models.JSONField(default=list, verbose_name="Amenities")
-    featured_image = models.URLField(blank=True, verbose_name="Featured Image URL")
-    
-    # Business fields
+    class Type(models.TextChoices):
+        HOTEL = 'hotel', _('Hotel')
+        RESIDENCE = 'residence', _('Residence')
+        APARTMENT = 'apartment', _('Apartment')
+        VILLA = 'villa', _('Villa')
+        OFFICE = 'office', _('Office / Co-working')
+
+    property_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=120)
+    type = models.CharField(max_length=20, choices=Type.choices, default=Type.APARTMENT)
+    location = models.CharField(max_length=200)
+    description = models.TextField(blank=True, default='')
+    amenities = models.JSONField(default=list, blank=True)   # e.g. ["WiFi", "Pool", "Parking"]
+    media = models.JSONField(default=list, blank=True)       # list of image URLs
+    is_public = models.BooleanField(default=True)
+    views = models.PositiveIntegerField(default=0)
+    rating = models.FloatField(
+        default=0.0,
+        validators=[MinValueValidator(0.0), MaxValueValidator(5.0)]
+    )
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='owned_properties',
         limit_choices_to={'role': 'owner'},
-        verbose_name="Property Owner"
+        null=True, blank=True,
     )
-    
-    # Status and visibility
-    is_active = models.BooleanField(default=True, verbose_name="Active")
-    is_featured = models.BooleanField(default=False, verbose_name="Featured")
-    is_verified = models.BooleanField(default=False, verbose_name="Verified")
-    
-    # Ratings and statistics
-    average_rating = models.FloatField(
-        default=0.0,
-        validators=[MinValueValidator(0.0), MaxValueValidator(5.0)],
-        verbose_name="Average Rating"
-    )
-    total_reviews = models.IntegerField(default=0, verbose_name="Total Reviews")
-    booking_count = models.IntegerField(default=0, verbose_name="Total Bookings")
-    
-    # Timestamps
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
-    updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated At")
-    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     class Meta:
-        verbose_name = "Property"
-        verbose_name_plural = "Properties"
+        verbose_name = _('Property')
+        verbose_name_plural = _('Properties')
         ordering = ['-created_at']
         indexes = [
-            models.Index(fields=['owner', 'is_active']),
-            models.Index(fields=['city', 'is_active']),
-            models.Index(fields=['type', 'is_active']),
-            models.Index(fields=['is_featured', 'is_active']),
+            models.Index(fields=['owner']),
+            models.Index(fields=['type']),
+            models.Index(fields=['is_public']),
         ]
-    
+
     def __str__(self):
-        return f"{self.name} - {self.city}"
-    
-    @property
-    def full_address(self):
-        """Return formatted full address."""
-        parts = [self.address, self.city, self.postal_code, self.country]
-        return ", ".join(filter(None, parts))
-    
-    @property
-    def active_apartments_count(self):
-        """Count of active apartments."""
-        return self.apartments.filter(is_active=True).count()
-    
+        return self.name
+
     def update_rating(self):
-        """Update average rating based on reviews."""
-        from apps.reviews.models import Review
-        reviews = Review.objects.filter(booking__property=self, is_active=True)
+        """Recalculate average rating from all reviews."""
+        reviews = self.reviews.all()
         if reviews.exists():
-            self.average_rating = reviews.aggregate(models.Avg('rating'))['rating__avg'] or 0.0
-            self.total_reviews = reviews.count()
+            avg = reviews.aggregate(models.Avg('rating'))['rating__avg']
+            self.rating = round(avg, 2)
         else:
-            self.average_rating = 0.0
-            self.total_reviews = 0
-        self.save(update_fields=['average_rating', 'total_reviews'])
+            self.rating = 0.0
+        self.save(update_fields=['rating'])
+
+
+class AvailableDate(models.Model):
+    """Stores available date ranges for an apartment."""
+    apartment = models.ForeignKey(
+        'Apartment', on_delete=models.CASCADE, related_name='available_dates'
+    )
+    start = models.DateField()
+    end = models.DateField(null=True, blank=True)  # None = indefinite
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Available Date Range')
+        verbose_name_plural = _('Available Date Ranges')
+        ordering = ['start']
+
+    def __str__(self):
+        end_str = self.end.strftime('%Y-%m-%d') if self.end else 'open-ended'
+        return f'{self.apartment.name}: {self.start:%Y-%m-%d} → {end_str}'
 
 
 class Apartment(models.Model):
-    """
-    Individual apartment/unit within a property.
-    """
-    
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=100, verbose_name="Apartment Name")
+    """A bookable unit within a Property."""
+    apartment_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     property = models.ForeignKey(
-        Property,
-        on_delete=models.CASCADE,
-        related_name='apartments',
-        verbose_name="Property"
+        Property, on_delete=models.CASCADE, related_name='apartments'
     )
-    
-    # Capacity and pricing
-    max_guests = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(20)],
-        verbose_name="Maximum Guests"
+    name = models.CharField(max_length=100)
+    type = models.CharField(max_length=100, help_text='e.g. Studio, Suite, 2-BR')
+    price = models.DecimalField(
+        max_digits=10, decimal_places=2,
+        validators=[MinValueValidator(0)]
     )
-    bedrooms = models.IntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(10)],
-        default=1,
-        verbose_name="Bedrooms"
-    )
-    beds = models.IntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(20)],
-        default=1,
-        verbose_name="Beds"
-    )
-    bathrooms = models.IntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(10)],
-        default=1,
-        verbose_name="Bathrooms"
-    )
-    
-    # Pricing
-    price_per_night = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        validators=[MinValueValidator(0)],
-        verbose_name="Price per Night"
-    )
-    cleaning_fee = models.DecimalField(
-        max_digits=8,
-        decimal_places=2,
-        default=0,
-        validators=[MinValueValidator(0)],
-        verbose_name="Cleaning Fee"
-    )
-    service_fee = models.DecimalField(
-        max_digits=8,
-        decimal_places=2,
-        default=0,
-        validators=[MinValueValidator(0)],
-        verbose_name="Service Fee"
-    )
-    
-    # Description and amenities
-    description = models.TextField(blank=True, verbose_name="Description")
-    amenities = models.JSONField(default=list, verbose_name="Apartment Amenities")
-    images = models.JSONField(default=list, verbose_name="Apartment Images")
-    
-    # Status
-    is_active = models.BooleanField(default=True, verbose_name="Active")
-    is_available_for_booking = models.BooleanField(default=True, verbose_name="Available for Booking")
-    
-    # Timestamps
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
-    updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated At")
-    
+    max_guests = models.PositiveSmallIntegerField(default=2)
+    media = models.JSONField(default=list, blank=True)
+    is_public = models.BooleanField(default=True)
+    description = models.TextField(blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     class Meta:
-        verbose_name = "Apartment"
-        verbose_name_plural = "Apartments"
+        verbose_name = _('Apartment / Unit')
+        verbose_name_plural = _('Apartments / Units')
         ordering = ['property', 'name']
-        indexes = [
-            models.Index(fields=['property', 'is_active']),
-            models.Index(fields=['max_guests', 'is_active']),
-            models.Index(fields=['price_per_night']),
-        ]
-    
+
     def __str__(self):
-        return f"{self.name} - {self.property.name}"
-    
-    @property
-    def total_price_per_night(self):
-        """Calculate total price including fees."""
-        return float(self.price_per_night) + float(self.cleaning_fee) + float(self.service_fee)
-    
-    def is_available(self, check_in, check_out, exclude_booking_id=None):
+        return f'{self.name} — {self.property.name}'
+
+    # ── Availability logic (ported + improved from source) ────────────────────
+
+    def is_available(self, date_in, num_nights, exclude_booking_id=None):
         """
-        Check if apartment is available for given date range.
-        
-        Args:
-            check_in (date): Check-in date
-            check_out (date): Check-out date
-            exclude_booking_id (UUID, optional): Exclude this booking from conflict check
-            
-        Returns:
-            bool: True if available, False otherwise
+        Check if this apartment is available for [date_in, date_in + num_nights).
+        Checks:
+          1. Falls within an AvailableDate range
+          2. No conflicting pending/confirmed booking
         """
-        if not self.is_active or not self.is_available_for_booking:
+        from datetime import date as date_type
+        if isinstance(date_in, str):
+            date_in = datetime.strptime(date_in, '%Y-%m-%d').date()
+
+        date_out = date_in + timedelta(days=int(num_nights))
+
+        # 1. Must fall within an available range
+        in_range = False
+        for avail in self.available_dates.all():
+            range_ok = avail.start <= date_in and (
+                avail.end is None or date_out <= avail.end
+            )
+            if range_ok:
+                in_range = True
+                break
+
+        if not in_range:
             return False
-        
-        # Check for overlapping bookings
+
+        # 2. No overlapping confirmed/pending bookings
         from apps.bookings.models import Booking
-        
-        conflicting_bookings = Booking.objects.filter(
+        conflicts = Booking.objects.filter(
             apartment=self,
             status__in=['pending', 'confirmed'],
-            check_in__lt=check_out,
-            check_out__gt=check_in
+            date_in__lt=date_out,
+            date_out__gt=date_in,
         )
-        
         if exclude_booking_id:
-            conflicting_bookings = conflicting_bookings.exclude(id=exclude_booking_id)
-        
-        return not conflicting_bookings.exists()
-    
-    def get_available_dates(self, start_date, end_date=None):
+            conflicts = conflicts.exclude(id=exclude_booking_id)
+
+        return not conflicts.exists()
+
+    def book_dates(self, date_in, num_nights):
         """
-        Get available date ranges for the apartment.
-        This would integrate with a calendar/availability system.
+        Remove the booked period from available date ranges, splitting as needed.
+        Returns True on success, False if not available.
         """
-        # This would be implemented with a proper availability calendar
-        # For now, return basic availability
-        return True
+        if isinstance(date_in, str):
+            date_in = datetime.strptime(date_in, '%Y-%m-%d').date()
+
+        date_out = date_in + timedelta(days=int(num_nights))
+
+        for avail in self.available_dates.all():
+            range_covers = avail.start <= date_in and (
+                avail.end is None or date_out <= avail.end
+            )
+            if range_covers:
+                # Create the "before" portion if it exists
+                if avail.start < date_in:
+                    AvailableDate.objects.create(
+                        apartment=self, start=avail.start, end=date_in
+                    )
+                # Create the "after" portion if it exists
+                if avail.end is None or date_out < avail.end:
+                    AvailableDate.objects.create(
+                        apartment=self, start=date_out, end=avail.end
+                    )
+                avail.delete()
+                return True
+
+        return False
+
+    def add_available_dates(self, start_date, end_date=None):
+        """
+        Add a new available range, merging with adjacent/overlapping ranges.
+        Used when a booking is cancelled or refused.
+        """
+        if isinstance(start_date, str):
+            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+        if end_date and isinstance(end_date, str):
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+
+        overlapping = []
+        for avail in self.available_dates.all():
+            if self._overlaps_or_adjacent(start_date, end_date, avail.start, avail.end):
+                overlapping.append(avail)
+
+        if overlapping:
+            all_starts = [start_date] + [r.start for r in overlapping]
+            all_ends = [end_date] + [r.end for r in overlapping if r.end is not None]
+            merged_start = min(all_starts)
+            merged_end = max(all_ends) if all_ends and end_date is not None else None
+
+            for r in overlapping:
+                r.delete()
+
+            AvailableDate.objects.create(apartment=self, start=merged_start, end=merged_end)
+        else:
+            AvailableDate.objects.create(apartment=self, start=start_date, end=end_date)
+
+    @staticmethod
+    def _overlaps_or_adjacent(s1, e1, s2, e2):
+        """True if [s1,e1] and [s2,e2] overlap or are adjacent (any None = open-ended)."""
+        if e1 is None and e2 is None:
+            return True
+        if e1 is None:
+            return e2 >= s1 if e2 else True
+        if e2 is None:
+            return e1 >= s2
+        return (s1 <= e2 and s2 <= e1) or e1 == s2 or e2 == s1
 
 
-class PropertyImage(models.Model):
-    """
-    Individual property images with ordering and metadata.
-    """
-    
+class Review(models.Model):
+    """A guest review for a Property."""
+    review_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='reviews',
+        limit_choices_to={'role__in': ['client', 'guest']},
+    )
     property = models.ForeignKey(
-        Property,
-        on_delete=models.CASCADE,
-        related_name='property_images',
-        verbose_name="Property"
+        Property, on_delete=models.CASCADE, related_name='reviews'
     )
-    image = models.ImageField(upload_to='property_images/', verbose_name="Image")
-    caption = models.CharField(max_length=200, blank=True, verbose_name="Caption")
-    is_primary = models.BooleanField(default=False, verbose_name="Primary Image")
-    order = models.IntegerField(default=0, verbose_name="Display Order")
-    
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
-    
-    class Meta:
-        verbose_name = "Property Image"
-        verbose_name_plural = "Property Images"
-        ordering = ['order', 'created_at']
-        indexes = [
-            models.Index(fields=['property', 'is_primary']),
-            models.Index(fields=['property', 'order']),
-        ]
-    
-    def __str__(self):
-        return f"{self.property.name} - Image {self.order}"
+    rating = models.FloatField(validators=[MinValueValidator(1.0), MaxValueValidator(5.0)])
+    comment = models.TextField(blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
 
-
-class ApartmentImage(models.Model):
-    """
-    Individual apartment images with ordering and metadata.
-    """
-    
-    apartment = models.ForeignKey(
-        Apartment,
-        on_delete=models.CASCADE,
-        related_name='apartment_images',
-        verbose_name="Apartment"
-    )
-    image = models.ImageField(upload_to='apartment_images/', verbose_name="Image")
-    caption = models.CharField(max_length=200, blank=True, verbose_name="Caption")
-    is_primary = models.BooleanField(default=False, verbose_name="Primary Image")
-    order = models.IntegerField(default=0, verbose_name="Display Order")
-    
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
-    
     class Meta:
-        verbose_name = "Apartment Image"
-        verbose_name_plural = "Apartment Images"
-        ordering = ['order', 'created_at']
-        indexes = [
-            models.Index(fields=['apartment', 'is_primary']),
-            models.Index(fields=['apartment', 'order']),
-        ]
-    
+        verbose_name = _('Review')
+        verbose_name_plural = _('Reviews')
+        ordering = ['-created_at']
+        # One review per user per property
+        unique_together = [('user', 'property')]
+
     def __str__(self):
-        return f"{self.apartment.name} - Image {self.order}"
+        return f'Review by {self.user.username} for {self.property.name} ({self.rating}★)'
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # Update property's average rating
+        self.property.update_rating()

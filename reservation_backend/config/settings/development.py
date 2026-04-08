@@ -1,38 +1,40 @@
 """
-Development settings.
+Development settings for AIMO.
 """
-
 from .base import *
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
-
-# Database – SQLite for quick local dev (override in .env for Postgres)
+# ─── Database ─────────────────────────────────────────────────────────────────
+# Database (SQLite for development - switch to PostgreSQL in production)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
+    # Uncomment below for PostgreSQL when Docker is running
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': os.environ.get('DB_NAME', 'aimo_db'),
+    #     'USER': os.environ.get('DB_USER', 'postgres'),
+    #     'PASSWORD': os.environ.get('DB_PASSWORD', 'postgres'),
+    #     'HOST': os.environ.get('DB_HOST', 'localhost'),
+    #     'PORT': os.environ.get('DB_PORT', '5432'),
+    #     'CONN_MAX_AGE': 60,
+    #     'OPTIONS': {
+    #         'connect_timeout': 10,
+    #     },
+    # }
 }
 
-# CORS – allow all origins in development
-CORS_ALLOW_ALL_ORIGINS = True
-
-# Email backend – console for local development
+# ─── Email (console in dev) ───────────────────────────────────────────────────
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-# Django Debug Toolbar (optional, install separately)
-INSTALLED_APPS += ['django_extensions']
+# ─── CORS (allow all in dev) ─────────────────────────────────────────────────
+CORS_ALLOW_ALL_ORIGINS = True
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {'class': 'logging.StreamHandler'},
-    },
-    'root': {
-        'handlers': ['console'],
-        'level': 'DEBUG',
-    },
-}
+# ─── Django Debug Toolbar (optional) ─────────────────────────────────────────
+# Uncomment if you install django-debug-toolbar
+# INSTALLED_APPS += ['debug_toolbar']
+# MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
+# INTERNAL_IPS = ['127.0.0.1']
