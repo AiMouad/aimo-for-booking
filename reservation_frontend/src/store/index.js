@@ -4,6 +4,7 @@ import propertiesReducer from './propertiesSlice';
 import bookingsReducer from './bookingsSlice';
 import chatbotReducer from './chatbotSlice';
 import notificationsReducer from './notificationsSlice';
+import themeReducer from './themeSlice';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     bookings: bookingsReducer,
     chatbot: chatbotReducer,
     notifications: notificationsReducer,
+    theme: themeReducer,
   },
   middleware: (getDefault) =>
     getDefault({
@@ -19,6 +21,7 @@ export const store = configureStore({
         ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
       },
     }),
+  devTools: process.env.NODE_ENV !== 'production',
 });
 
 export default store;

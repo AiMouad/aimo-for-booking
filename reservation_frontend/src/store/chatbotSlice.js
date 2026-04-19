@@ -80,7 +80,7 @@ const chatbotSlice = createSlice({
         state.messages.push({
           id: Date.now(),
           role: 'assistant',
-          content: '❌ Sorry, I encountered an error. Please try again.',
+          content: 'Sorry, I encountered an error. Please try again.',
           timestamp: new Date().toISOString(),
         });
       })

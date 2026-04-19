@@ -26,13 +26,13 @@ const ReservationCard = ({ reservation, showActions = true }) => {
 
   const getStatusIcon = (status) => {
     const icons = {
-      PENDING: '⏳',
-      CONFIRMED: '✅',
-      COMPLETED: '🎉',
-      CANCELLED: '❌',
-      NO_SHOW: '🚫',
+      PENDING: 'Pending',
+      CONFIRMED: 'Confirmed',
+      COMPLETED: 'Completed',
+      CANCELLED: 'Cancelled',
+      NO_SHOW: 'No Show',
     };
-    return icons[status] || '📅';
+    return icons[status] || 'Booked';
   };
 
   const formatDateTime = (dateTime) => {

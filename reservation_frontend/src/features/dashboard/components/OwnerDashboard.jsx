@@ -45,7 +45,7 @@ const OwnerDashboard = () => {
       value: formatCurrency(statistics?.revenue?.total_revenue || 0),
       change: '+12.5%',
       changeType: 'positive',
-      icon: '💰',
+      icon: 'Money',
       color: 'green',
     },
     {
@@ -53,7 +53,7 @@ const OwnerDashboard = () => {
       value: statistics?.summary?.total || 0,
       change: '+8.2%',
       changeType: 'positive',
-      icon: '📅',
+      icon: 'Calendar',
       color: 'blue',
     },
     {
@@ -61,7 +61,7 @@ const OwnerDashboard = () => {
       value: services.filter(s => s.is_active).length,
       change: '+2',
       changeType: 'positive',
-      icon: '🛠️',
+      icon: 'Tools',
       color: 'purple',
     },
     {
@@ -71,7 +71,7 @@ const OwnerDashboard = () => {
       ),
       change: '+5.1%',
       changeType: 'positive',
-      icon: '✅',
+      icon: 'Check',
       color: 'emerald',
     },
   ];
@@ -198,13 +198,13 @@ const OwnerDashboard = () => {
                 {/* Quick Actions */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Button variant="primary" className="w-full">
-                    ➕ Add New Service
+                    Add New Service
                   </Button>
                   <Button variant="secondary" className="w-full">
-                    👥 Manage Staff
+                    Manage Staff
                   </Button>
                   <Button variant="secondary" className="w-full">
-                    📊 View Analytics
+                    View Analytics
                   </Button>
                 </div>
               </div>
@@ -265,7 +265,7 @@ const OwnerDashboard = () => {
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">Users</h3>
-                  <Button variant="primary">👤 Invite User</Button>
+                  <Button variant="primary">Invite User</Button>
                 </div>
                 <p className="text-gray-600">User management interface coming soon...</p>
               </div>

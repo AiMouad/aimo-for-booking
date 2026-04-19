@@ -24,10 +24,20 @@ class BookingViewSet(viewsets.ModelViewSet):
         user = self.request.user
         qs = Booking.objects.select_related('property_obj', 'apartment', 'user')
 
-        if user.role in ('owner', 'admin'):
+        if user.role == 'admin':
             return qs.all()
+        if user.role == 'owner':
+            # Owner sees only bookings for their properties
+            return qs.filter(property_obj__owner=user)
         if user.role == 'worker':
-            return qs.all()
+            # Worker sees only bookings for properties they are assigned to
+            from apps.workers.models import WorkerProfile
+            try:
+                profile = WorkerProfile.objects.get(user=user)
+                assigned_props = profile.assigned_properties.values_list('property_id', flat=True)
+                return qs.filter(property_obj__property_id__in=assigned_props)
+            except WorkerProfile.DoesNotExist:
+                return qs.none()
         if user.role == 'client':
             return qs.filter(user=user)
         return qs.none()

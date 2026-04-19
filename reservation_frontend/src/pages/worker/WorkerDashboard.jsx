@@ -66,7 +66,7 @@ const WorkerDashboard = () => {
       {/* Header */}
       <motion.div variants={item}>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Good {new Date().getHours() < 12 ? 'morning' : 'afternoon'}, {user?.username || 'Worker'} 👋
+          Good {new Date().getHours() < 12 ? 'morning' : 'afternoon'}, {user?.username || 'Worker'}
         </h1>
         <p className="text-gray-500 text-sm mt-1">
           {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}

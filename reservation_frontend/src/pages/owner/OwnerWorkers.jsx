@@ -123,7 +123,7 @@ const OwnerWorkers = () => {
     setIsSaving(true);
     try {
       await authAPI.register({ ...form, role: 'worker' });
-      toast.success('Worker account created! 👷');
+      toast.success('Worker account created!');
       setCreateModal(false);
       setForm(emptyWorkerForm);
       setFormErrors({});

@@ -9,7 +9,7 @@ Rebuild and improve the existing reservation system in `C:\Users\pc\Desktop\ING_
 ## Analysis Summary
 
 ### Source Backend (`C:\Users\pc\Desktop\reservation\BackEnd`)
-#### ✅ Strengths to Reuse:
+##vv## ✅ Strengths to Reuse:
 - Custom `User` model with role-based system (guest/client/owner/worker)
 - `Booking` model with conflict detection via `is_available()` and `book_dates()`  
 - `Apartment` availability range management (`AvailableDate` model + split/merge logic)

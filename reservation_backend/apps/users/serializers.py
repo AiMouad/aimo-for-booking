@@ -88,13 +88,13 @@ class UserCreateSerializer(serializers.ModelSerializer):
         return value
 
     def validate_role(self, value):
-        # Clients and guests can self-register; owners/workers are created by admin
-        allowed_self_register = ('client', 'guest')
+        # Clients, guests, and owners can self-register; workers are created by admin
+        allowed_self_register = ('client', 'guest', 'owner')
         request = self.context.get('request')
         if request and not request.user.is_authenticated:
             if value not in allowed_self_register:
                 raise serializers.ValidationError(
-                    'You can only register as a client. Owner and worker accounts are created by an admin.'
+                    'You can only register as a client or owner. Worker accounts are created by an admin.'
                 )
         return value
 

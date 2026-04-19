@@ -61,10 +61,10 @@ const Message = ({ message }) => {
 };
 
 const QUICK_PROMPTS = [
-  'Show my bookings 📋',
-  'Available properties ✨',
-  'Give me a tip 💡',
-  'How to cancel? ❌',
+  'Show my bookings',
+  'Available properties',
+  'Give me a tip',
+  'How to cancel?',
 ];
 
 const ChatbotWidget = () => {
@@ -157,7 +157,7 @@ const ChatbotWidget = () => {
                     <Bot size={28} className="text-white" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-800 dark:text-gray-200">Hi! I'm AIMO 👋</h4>
+                    <h4 className="font-semibold text-gray-800 dark:text-gray-200">Hi! I'm AIMO</h4>
                     <p className="text-gray-400 text-xs mt-1">Your intelligent booking assistant</p>
                   </div>
                   {/* Quick prompts */}

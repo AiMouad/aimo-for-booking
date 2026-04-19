@@ -1,15 +1,17 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Building2, Plus, Pencil, Trash2, Eye, MapPin,
-  Star, Home, RefreshCw, AlertCircle, ChevronDown, X,
+  Building2, Plus, Pencil, Trash2, ArrowRight, MapPin,
+  Star, Home, RefreshCw, AlertCircle, ChevronDown, X, Bed,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { propertiesAPI } from '../../services/api';
+import { propertiesAPI, apartmentsAPI } from '../../services/api';
 import Badge from '../../components/common/Badge';
 import Button from '../../components/common/Button';
 import Modal from '../../components/common/Modal';
 import Input from '../../components/common/Input';
+import AlgeriaLocationSelector from '../../components/common/AlgeriaLocationSelector';
 
 const PROPERTY_TYPES = ['hotel', 'apartment', 'residence', 'villa', 'office'];
 
@@ -18,12 +20,18 @@ const emptyForm = {
   amenities: [], is_public: true,
 };
 
-const PropertyCard = ({ property, onEdit, onDelete, onView }) => (
+const emptyApartmentForm = {
+  name: '', capacity: 2, price_per_night: 0, description: '',
+  amenities: [], is_available: true,
+};
+
+const PropertyCard = ({ property, onEdit, onDelete, onNavigate }) => (
   <motion.div
     initial={{ opacity: 0, y: 12 }}
     animate={{ opacity: 1, y: 0 }}
     whileHover={{ y: -3 }}
-    className="glass-card overflow-hidden group"
+    className="glass-card overflow-hidden group cursor-pointer"
+    onClick={() => onNavigate(property.property_id)}
   >
     {/* Image / placeholder */}
     <div className="relative h-44 bg-gradient-to-br from-primary-50 to-accent-100 dark:from-primary-950/30 dark:to-accent-900/20 overflow-hidden">
@@ -49,6 +57,12 @@ const PropertyCard = ({ property, onEdit, onDelete, onView }) => (
           Hidden
         </div>
       )}
+      {/* Hover overlay with navigate hint */}
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+        <span className="px-3 py-1.5 bg-white/90 text-gray-800 text-sm font-medium rounded-full flex items-center gap-1">
+          View Rooms <ArrowRight size={14} />
+        </span>
+      </div>
     </div>
 
     <div className="p-4">
@@ -60,11 +74,7 @@ const PropertyCard = ({ property, onEdit, onDelete, onView }) => (
         <span className="text-xs text-gray-400">
           {property.apartments_count || 0} unit{(property.apartments_count || 0) !== 1 ? 's' : ''}
         </span>
-        <div className="flex gap-1">
-          <button onClick={() => onView(property)}
-            className="p-1.5 rounded-lg text-gray-400 hover:text-primary-600 hover:bg-primary-50 transition-colors" title="View">
-            <Eye size={14} />
-          </button>
+        <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
           <button onClick={() => onEdit(property)}
             className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors" title="Edit">
             <Pencil size={14} />
@@ -95,10 +105,12 @@ const PropertyForm = ({ form, onChange, onSubmit, isLoading, title }) => (
       </select>
     </div>
 
-    <Input label="Location" required value={form.location}
+    <AlgeriaLocationSelector
+      label="Location (Wilaya & City)"
+      required
+      value={form.location}
       onChange={(e) => onChange('location', e.target.value)}
-      placeholder="City, Country" id="prop-location"
-      leftIcon={<MapPin size={15} />} />
+    />
 
     <div>
       <label className="aimo-label">Description</label>
@@ -127,6 +139,8 @@ const PropertyForm = ({ form, onChange, onSubmit, isLoading, title }) => (
 );
 
 const OwnerProperties = () => {
+  const navigate = useNavigate();
+  
   const [properties, setProperties] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -135,7 +149,6 @@ const OwnerProperties = () => {
   const [formModal, setFormModal] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const [viewTarget, setViewTarget] = useState(null);
 
   const [form, setForm] = useState(emptyForm);
 
@@ -174,10 +187,10 @@ const OwnerProperties = () => {
     try {
       if (editTarget) {
         await propertiesAPI.update(editTarget.property_id, form);
-        toast.success('Property updated! ✅');
+        toast.success('Property updated!');
       } else {
         await propertiesAPI.create(form);
-        toast.success('Property created! 🏢');
+        toast.success('Property created!');
       }
       setFormModal(false);
       setEditTarget(null);
@@ -246,7 +259,7 @@ const OwnerProperties = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {properties.map((p) => (
             <PropertyCard key={p.property_id} property={p}
-              onEdit={openEdit} onDelete={setDeleteTarget} onView={setViewTarget} />
+              onEdit={openEdit} onDelete={setDeleteTarget} onNavigate={(id) => navigate(`/owner/properties/${id}/rooms`)} />
           ))}
         </div>
       )}
@@ -291,40 +304,6 @@ const OwnerProperties = () => {
         </div>
       </Modal>
 
-      {/* ── View Modal ── */}
-      <Modal
-        isOpen={!!viewTarget}
-        onClose={() => setViewTarget(null)}
-        title="Property Details"
-        size="md"
-      >
-        {viewTarget && (
-          <div className="space-y-4 text-sm">
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                ['Name', viewTarget.name],
-                ['Type', viewTarget.type],
-                ['Location', viewTarget.location],
-                ['Rating', `${viewTarget.rating?.toFixed(1) || 0} / 5.0`],
-                ['Units', viewTarget.apartments_count || 0],
-                ['Views', viewTarget.views || 0],
-                ['Visibility', viewTarget.is_public ? 'Public' : 'Hidden'],
-              ].map(([k, v]) => (
-                <div key={k}>
-                  <p className="text-xs text-gray-400 font-medium">{k}</p>
-                  <p className="font-medium text-gray-800 dark:text-gray-200 capitalize">{String(v)}</p>
-                </div>
-              ))}
-            </div>
-            {viewTarget.description && (
-              <div className="pt-3 border-t border-gray-100 dark:border-gray-700">
-                <p className="text-xs text-gray-400 font-medium mb-1">Description</p>
-                <p className="text-gray-600 dark:text-gray-400">{viewTarget.description}</p>
-              </div>
-            )}
-          </div>
-        )}
-      </Modal>
     </div>
   );
 };

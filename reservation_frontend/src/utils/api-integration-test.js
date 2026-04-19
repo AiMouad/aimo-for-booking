@@ -17,7 +17,7 @@ class APIIntegrationTest {
 
   // Test runner
   async runAllTests() {
-    console.log('🚀 Starting API Integration Tests...\n');
+    console.log('Starting API Integration Tests...\n');
 
     const tests = [
       this.testHealthCheck,
@@ -227,7 +227,7 @@ class APIIntegrationTest {
 
   // Results and reporting
   printResults() {
-    console.log('\n📊 Test Results Summary:');
+    console.log('\nTest Results Summary:');
     console.log('========================');
     
     const passed = this.testResults.filter(r => r.passed).length;
@@ -235,18 +235,18 @@ class APIIntegrationTest {
     const total = this.testResults.length;
     
     console.log(`Total Tests: ${total}`);
-    console.log(`Passed: ${passed} ✅`);
-    console.log(`Failed: ${failed} ❌`);
+    console.log(`Passed: ${passed}`);
+    console.log(`Failed: ${failed}`);
     console.log(`Success Rate: ${((passed / total) * 100).toFixed(1)}%`);
     
     if (failed > 0) {
-      console.log('\n❌ Failed Tests:');
+      console.log('\nFailed Tests:');
       this.testResults
         .filter(r => r.passed === false)
         .forEach(r => console.log(`  - ${r.test}: ${r.message}`));
     }
     
-    console.log('\n🎯 API Integration Status:', failed === 0 ? 'SUCCESS ✅' : 'FAILED ❌');
+    console.log('\nAPI Integration Status:', failed === 0 ? 'SUCCESS' : 'FAILED');
   }
 
   // Individual test runner for debugging

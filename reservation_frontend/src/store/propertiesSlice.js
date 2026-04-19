@@ -54,8 +54,18 @@ const propertiesSlice = createSlice({
         state.isLoading = false;
         state.error = payload;
       })
+      .addCase(fetchPropertyDetail.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
       .addCase(fetchPropertyDetail.fulfilled, (state, { payload }) => {
+        state.isLoading = false;
         state.selected = payload;
+      })
+      .addCase(fetchPropertyDetail.rejected, (state, { payload }) => {
+        state.isLoading = false;
+        state.error = payload;
+        state.selected = null;
       });
   },
 });

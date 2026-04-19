@@ -13,6 +13,14 @@ class WorkerProfile(models.Model):
         related_name='worker_profile',
         limit_choices_to={'role': 'worker'},
     )
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='workers',
+        limit_choices_to={'role': 'owner'},
+        null=True, blank=True,
+        help_text='The owner who employs this worker'
+    )
     bio = models.TextField(blank=True, default='')
     specialization = models.CharField(max_length=100, blank=True, default='')
     assigned_properties = models.ManyToManyField(

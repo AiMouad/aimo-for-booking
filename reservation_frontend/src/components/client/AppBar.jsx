@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../store/authSlice";
 import toast from "react-hot-toast";
+import Logo_Aimo from "../../assets/IMGs/Logo_Aimo.png";
+import profiledef from "../../assets/IMGs/profiledef.png";
 
 const AppBarClient = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -55,10 +57,10 @@ const AppBarClient = () => {
   };
 
   const menuItems = [
-    { key: "home", label: "Home", icon: "🏠" },
-    { key: "search", label: "Search", icon: "🔍" },
-    { key: "bookings", label: "My Bookings", icon: "📅" },
-    { key: "favorites", label: "Favorites", icon: "❤️" },
+    { key: "home", label: "Home", icon: "Home" },
+    { key: "search", label: "Search", icon: "Search" },
+    { key: "bookings", label: "My Bookings", icon: "Book" },
+    { key: "favorites", label: "Favorites", icon: "Fav" },
   ];
 
   return (
@@ -66,9 +68,7 @@ const AppBarClient = () => {
       <div className="cli-appbar-container">
         <div className="cli-appbar-flex">
           <div className="cli-appbar-logo-section">
-            <div className="cli-appbar-logo">
-              <span className="cli-appbar-logo-text">AIMO</span>
-            </div>
+            <img src={Logo_Aimo} alt="AIMO Logo" className="cli-appbar-logo-img" />
             <h1 className="cli-appbar-title">AIMO</h1>
           </div>
 
@@ -120,7 +120,11 @@ const AppBarClient = () => {
                 className="cli-appbar-profile"
                 onClick={toggleProfileDropdown}
               >
-                <User className="cli-appbar-profile-icon" />
+                <img
+                  src={profiledef}
+                  alt="Profile"
+                  className="cli-appbar-profile-photo"
+                />
                 <span className="cli-appbar-profile-name">
                   {user?.username || "Guest"}
                 </span>

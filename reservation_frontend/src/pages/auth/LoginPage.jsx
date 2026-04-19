@@ -23,7 +23,7 @@ const LoginPage = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const userRole = useSelector(selectUserRole);
 
-  const [form, setForm] = useState({ email: '', password: '' });
+  const [form, setForm] = useState({ username: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
 
   // Redirect if already logged in
@@ -40,14 +40,14 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.email || !form.password) {
+    if (!form.username || !form.password) {
       toast.error('Please fill in all fields.');
       return;
     }
-    const result = await dispatch(loginUser(form));
+    const result = await dispatch(loginUser({ username: form.username, password: form.password }));
     if (loginUser.fulfilled.match(result)) {
       const role = result.payload.user?.role || 'client';
-      toast.success(`Welcome back! 👋`);
+      toast.success(`Welcome back!`, { duration: 8000 });
       navigate(ROLE_REDIRECTS[role] || '/services', { replace: true });
     }
   };
@@ -85,7 +85,7 @@ const LoginPage = () => {
             transition={{ delay: 0.3 }}
           >
             <h2 className="text-4xl font-bold leading-tight mb-4">
-              Manage bookings<br />with intelligence. ✨
+              Manage bookings<br />with intelligence.
             </h2>
             <p className="text-blue-200 text-lg">
               AI-powered platform for property owners, workers, and clients.
@@ -95,7 +95,7 @@ const LoginPage = () => {
 
           {/* Feature pills */}
           <div className="flex flex-wrap gap-2">
-            {['🤖 AI Chatbot', '📊 Analytics', '📅 Smart Booking', '👥 Role Management'].map((f) => (
+            {['AI Chatbot', 'Analytics', 'Smart Booking', 'Role Management'].map((f) => (
               <span key={f} className="px-3 py-1.5 bg-white/15 rounded-full text-sm font-medium">
                 {f}
               </span>
@@ -131,12 +131,12 @@ const LoginPage = () => {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <Input
-              label="Email address"
-              type="email"
-              placeholder="you@example.com"
+              label="Email or username"
+              type="text"
+              placeholder="you@example.com or username"
               required
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              value={form.username}
+              onChange={(e) => setForm({ ...form, username: e.target.value })}
               leftIcon={<Mail size={16} />}
               id="login-email"
             />

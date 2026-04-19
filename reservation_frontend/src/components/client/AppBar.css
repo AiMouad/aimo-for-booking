@@ -1,8 +1,8 @@
 /* Client AppBar Styles - Based on source project color scheme */
 :root {
   --primary-color: #087592;
-  --secondary-color: #2393b0;
-  --accent-color: #3b82f6;
+  --secondary-color: #0CC0DF;
+  --accent-color: #0CC0DF;
   --light-color: #f8f9fa;
   --text-color: #ffffff;
   --border-color: #3b82f6;
@@ -40,21 +40,17 @@
   gap: 8px;
 }
 
-.cli-appbar-logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
+.cli-appbar-logo-img {
   height: 40px;
-  background: var(--text-color);
-  border-radius: 8px;
-  font-weight: bold;
-  font-size: 1.2rem;
-  color: var(--primary-color);
+  width: auto;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  transition: all 0.3s ease;
 }
 
-.cli-appbar-logo-text {
-  display: none;
+.cli-appbar-logo-img:hover {
+  transform: scale(1.05);
+  filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
 }
 
 .cli-appbar-title {
@@ -191,10 +187,18 @@
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-.cli-appbar-profile-icon {
-  width: 20px;
-  height: 20px;
-  color: var(--text-color);
+.cli-appbar-profile-photo {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--text-color);
+  transition: all 0.3s ease;
+}
+
+.cli-appbar-profile:hover .cli-appbar-profile-photo {
+  transform: scale(1.1);
+  border-color: var(--accent-color);
 }
 
 .cli-appbar-profile-name {

@@ -108,7 +108,7 @@ const APIStatus = ({ showDetails = false }) => {
           {status === 'healthy' && (
             <div>
               <small className="text-muted">
-                ✅ Backend is running normally
+                Backend is running normally
                 {responseTime && ` (${responseTime}ms response time)`}
               </small>
             </div>
@@ -117,7 +117,7 @@ const APIStatus = ({ showDetails = false }) => {
           {status === 'checking' && (
             <div>
               <small className="text-muted">
-                🔄 Checking backend connection...
+Checking backend connection...
               </small>
             </div>
           )}
@@ -125,7 +125,7 @@ const APIStatus = ({ showDetails = false }) => {
           {status === 'error' && (
             <div>
               <small className="text-danger">
-                ❌ Cannot connect to backend
+Cannot connect to backend
               </small>
               {error && (
                 <div className="mt-1">
@@ -138,7 +138,7 @@ const APIStatus = ({ showDetails = false }) => {
           {status === 'unhealthy' && (
             <div>
               <small className="text-warning">
-                ⚠️ Backend is running but reporting issues
+Backend is running but reporting issues
               </small>
             </div>
           )}

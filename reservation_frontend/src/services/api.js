@@ -89,6 +89,17 @@ export const propertiesAPI = {
 };
 
 // ──────────────────────────────────────────────────────────────────────────────
+// Apartments
+// ──────────────────────────────────────────────────────────────────────────────
+export const apartmentsAPI = {
+  list: (propertyId, params) => api.get(`/properties/${propertyId}/apartments/`, { params }),
+  get: (id) => api.get(`/apartments/${id}/`),
+  create: (propertyId, data) => api.post(`/properties/${propertyId}/apartments/`, data),
+  update: (id, data) => api.patch(`/apartments/${id}/`, data),
+  delete: (id) => api.delete(`/apartments/${id}/`),
+};
+
+// ──────────────────────────────────────────────────────────────────────────────
 // Bookings
 // ──────────────────────────────────────────────────────────────────────────────
 export const bookingsAPI = {

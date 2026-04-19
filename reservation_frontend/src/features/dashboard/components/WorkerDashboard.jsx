@@ -109,7 +109,7 @@ const WorkerDashboard = () => {
                 <p className="text-sm font-medium text-gray-600">Today's Bookings</p>
                 <p className="text-2xl font-bold text-gray-900">{todayReservations.length}</p>
               </div>
-              <div className="text-3xl text-blue-500">📅</div>
+              <div className="text-3xl text-blue-500">Calendar</div>
             </div>
           </Card>
           
@@ -119,7 +119,7 @@ const WorkerDashboard = () => {
                 <p className="text-sm font-medium text-gray-600">Upcoming</p>
                 <p className="text-2xl font-bold text-gray-900">{upcomingReservationsFiltered.length}</p>
               </div>
-              <div className="text-3xl text-purple-500">⏰</div>
+              <div className="text-3xl text-purple-500">Clock</div>
             </div>
           </Card>
           
@@ -131,7 +131,7 @@ const WorkerDashboard = () => {
                   {upcomingReservations.filter(r => r.status === 'PENDING').length}
                 </p>
               </div>
-              <div className="text-3xl text-yellow-500">⏳</div>
+              <div className="text-3xl text-yellow-500">Pending</div>
             </div>
           </Card>
           
@@ -190,7 +190,7 @@ const WorkerDashboard = () => {
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Today's Schedule</h3>
                   {todayReservations.length === 0 ? (
                     <div className="text-center py-8 text-gray-500">
-                      <div className="text-6xl mb-4">📅</div>
+                      <div className="text-6xl mb-4">Calendar</div>
                       <p>No reservations for today</p>
                     </div>
                   ) : (
@@ -223,14 +223,14 @@ const WorkerDashboard = () => {
                                     variant="primary"
                                     onClick={() => handleStatusUpdate(reservation.id, 'CONFIRMED')}
                                   >
-                                    ✅ Confirm
+                                    Confirm
                                   </Button>
                                   <Button
                                     size="sm"
                                     variant="danger"
                                     onClick={() => handleStatusUpdate(reservation.id, 'CANCELLED')}
                                   >
-                                    ❌ Cancel
+                                    Cancel
                                   </Button>
                                 </div>
                               )}
@@ -240,7 +240,7 @@ const WorkerDashboard = () => {
                                   variant="success"
                                   onClick={() => handleStatusUpdate(reservation.id, 'COMPLETED')}
                                 >
-                                  🎉 Complete
+                                  Complete
                                 </Button>
                               )}
                             </div>
@@ -337,10 +337,10 @@ const WorkerDashboard = () => {
                 </p>
                 <div className="text-center py-8">
                   <Button variant="primary" className="mr-4">
-                    📅 Set Working Hours
+                    Calendar Set Working Hours
                   </Button>
                   <Button variant="secondary">
-                    🗓️ Block Dates
+                    Block Dates
                   </Button>
                 </div>
               </div>

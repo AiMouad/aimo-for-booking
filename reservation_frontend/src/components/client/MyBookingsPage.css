@@ -3,6 +3,8 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   padding: 20px;
+  --primary-color: #087592;
+  --secondary-color: #0CC0DF;
 }
 
 .cli-bookings-container {
@@ -44,6 +46,16 @@
   color: #d1d5db;
   margin-bottom: 20px;
   opacity: 0.5;
+}
+
+.cli-bookings-empty-photo {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid white;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .cli-bookings-empty-title {

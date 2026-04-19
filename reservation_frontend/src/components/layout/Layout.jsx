@@ -11,10 +11,10 @@ const Layout = ({ children }) => {
   const isActive = (path) => location.pathname === path;
 
   const navigation = [
-    { name: 'Services', path: '/services', icon: '🛠️' },
-    { name: 'My Reservations', path: '/my-reservations', icon: '📅', requiredRole: 'CLIENT' },
-    { name: 'Dashboard', path: '/worker', icon: '👷', requiredRole: 'WORKER' },
-    { name: 'Owner Dashboard', path: '/owner', icon: '👤', requiredRole: 'OWNER' },
+    { name: 'Services', path: '/services', icon: null },
+    { name: 'My Reservations', path: '/my-reservations', icon: null, requiredRole: 'CLIENT' },
+    { name: 'Dashboard', path: '/worker', icon: null, requiredRole: 'WORKER' },
+    { name: 'Owner Dashboard', path: '/owner', icon: null, requiredRole: 'OWNER' },
   ];
 
   const filteredNavigation = navigation.filter(item => {
@@ -32,7 +32,7 @@ const Layout = ({ children }) => {
             {/* Logo */}
             <div className="flex items-center">
               <Link to="/" className="text-2xl font-bold text-blue-600">
-                🏠 BookingSystem
+                BookingSystem
               </Link>
             </div>
 
@@ -175,15 +175,15 @@ const Layout = ({ children }) => {
               <div className="flex space-x-4">
                 <a href="#" className="text-gray-400 hover:text-gray-500">
                   <span className="sr-only">Facebook</span>
-                  📘
+                  Facebook
                 </a>
                 <a href="#" className="text-gray-400 hover:text-gray-500">
                   <span className="sr-only">Twitter</span>
-                  🐦
+                  Twitter
                 </a>
                 <a href="#" className="text-gray-400 hover:text-gray-500">
                   <span className="sr-only">LinkedIn</span>
-                  💼
+                  LinkedIn
                 </a>
               </div>
             </div>

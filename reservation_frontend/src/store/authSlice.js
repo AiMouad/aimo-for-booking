@@ -74,6 +74,13 @@ const authSlice = createSlice({
   reducers: {
     clearError: (state) => { state.error = null; },
     clearRegistration: (state) => { state.registrationSuccess = false; },
+    logout: (state) => {
+      state.user = null;
+      state.isAuthenticated = false;
+      state.error = null;
+      localStorage.removeItem('aimo_access_token');
+      localStorage.removeItem('aimo_refresh_token');
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -126,6 +133,7 @@ const authSlice = createSlice({
 });
 
 export const { clearError, clearRegistration } = authSlice.actions;
+export const logout = authSlice.actions.logout;
 export default authSlice.reducer;
 
 // Selectors
@@ -134,3 +142,5 @@ export const selectIsAuthenticated = (state) => state.auth.isAuthenticated;
 export const selectAuthLoading = (state) => state.auth.isLoading;
 export const selectAuthError = (state) => state.auth.error;
 export const selectUserRole = (state) => state.auth.user?.role;
+export const selectAuthUser = (state) => state.auth.user;
+export const selectRegistrationSuccess = (state) => state.auth.registrationSuccess;

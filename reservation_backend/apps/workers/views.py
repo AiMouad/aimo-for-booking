@@ -20,10 +20,15 @@ class WorkerViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role in ('owner', 'admin'):
+        if user.role == 'admin':
             return WorkerProfile.objects.prefetch_related(
                 'schedules', 'assigned_properties', 'user'
             ).all()
+        if user.role == 'owner':
+            # Owner sees only their own workers
+            return WorkerProfile.objects.prefetch_related(
+                'schedules', 'assigned_properties', 'user'
+            ).filter(owner=user)
         # Worker sees only their own profile
         return WorkerProfile.objects.filter(user=user)
 
@@ -74,8 +79,11 @@ class WorkerScheduleViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role in ('owner', 'admin'):
+        if user.role == 'admin':
             return WorkerSchedule.objects.all()
+        if user.role == 'owner':
+            # Owner sees only their workers' schedules
+            return WorkerSchedule.objects.filter(worker__owner=user)
         try:
             profile = WorkerProfile.objects.get(user=user)
             return WorkerSchedule.objects.filter(worker=profile)

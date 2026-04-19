@@ -6,6 +6,7 @@ import { Bell, Search, Menu } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 import Sidebar from './Sidebar';
 import { selectUser } from '../../store/authSlice';
+import ChatbotWidget from '../chatbot/ChatbotWidget';
 
 /**
  * DashboardLayout — shared layout for owner, worker, and admin interfaces.
@@ -65,9 +66,9 @@ const DashboardLayout = () => {
           {/* Right side */}
           <div className="flex items-center gap-2 ml-auto">
             {/* Notifications */}
-            <button className="relative btn-ghost w-10 h-10 rounded-xl flex items-center justify-center">
-              <Bell size={18} />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full" />
+            <button className="relative btn-ghost w-11 h-11 rounded-xl flex items-center justify-center">
+              <Bell size={20} />
+              <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-800" />
             </button>
 
             {/* Avatar */}
@@ -108,6 +109,9 @@ const DashboardLayout = () => {
           },
         }}
       />
+
+      {/* AI Chatbot Widget */}
+      <ChatbotWidget />
     </div>
   );
 };

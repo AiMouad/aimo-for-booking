@@ -62,13 +62,13 @@ const NotificationDropdown = () => {
 
   const getNotificationIcon = (type) => {
     const icons = {
-      reservation_created: '📅',
-      reservation_confirmed: '✅',
-      reservation_cancelled: '❌',
-      reservation_reminder: '⏰',
-      system_announcement: '📢',
+      reservation_created: 'Book',
+      reservation_confirmed: 'Confirmed',
+      reservation_cancelled: 'Cancelled',
+      reservation_reminder: 'Reminder',
+      system_announcement: 'Announcement',
     };
-    return icons[type] || '🔔';
+    return icons[type] || 'Notification';
   };
 
   const formatTimestamp = (timestamp) => {

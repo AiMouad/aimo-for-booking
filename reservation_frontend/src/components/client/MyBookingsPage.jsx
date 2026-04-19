@@ -5,6 +5,8 @@ import { useSelector } from "react-redux";
 import { bookingsAPI } from "../../services/api";
 import toast from "react-hot-toast";
 import "./MyBookingsPage.css";
+import backgroundprofil from "../../assets/IMGs/backgroundprofil.png";
+import defphoto from "../../assets/IMGs/defphoto.png";
 
 const MyBookingsPage = () => {
   const [bookings, setBookings] = useState([]);
@@ -158,8 +160,9 @@ const MyBookingsPage = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6 }}
             className="cli-bookings-empty"
+            style={{ backgroundImage: `url(${backgroundprofil})` }}
           >
-            <Calendar className="cli-bookings-empty-icon" />
+            <img src={defphoto} alt="No bookings" className="cli-bookings-empty-photo" />
             <h3 className="cli-bookings-empty-title">No Bookings Yet</h3>
             <p className="cli-bookings-empty-message">
               Start exploring and book your next adventure!
